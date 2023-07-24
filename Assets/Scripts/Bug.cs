@@ -8,6 +8,7 @@ public class Bug : MonoBehaviour
     public float moveSpeed;
     public float moveRotationSpeed;
     public float rotateInPlaceSpeed;
+    public float lungeInPlaceSpeed;
     // public Leg leg1;
     // public Leg leg2;
     [Tooltip("left, right")]
@@ -16,6 +17,7 @@ public class Bug : MonoBehaviour
     public Leg[] midLegs = new Leg[2];
     [Tooltip("left, right")]
     public Leg[] hindLegs = new Leg[2];
+    public Leg[][] allLegs;
     public Body body;
     public float max = .3f;
     public float min = .2f;
@@ -35,6 +37,7 @@ public class Bug : MonoBehaviour
         bool moving = false;
         float movementInputX = Input.GetAxis("Horizontal");
         float movementInputY = Input.GetAxis("Vertical");
+        allLegs = new Leg[][] { frontLegs, midLegs, hindLegs };
         Vector3 movementInput = new Vector3(movementInputX, 0, movementInputY).normalized; // unity uses z axis for "up/down", whatever, I don't care
         if (movementInput != Vector3.zero)
         { // nb. float bullshit will make this not work, maybe fiddle with it
@@ -66,13 +69,55 @@ public class Bug : MonoBehaviour
         float rotationInput = Input.GetAxis("Rotation");
         if (rotationInput != 0)
         {
+            // if any leg is longer than max extension, should not turn.
+            // save original rotation
+            // apply new rotation
+            // check leg extension
+            // roll back if necessary
+            Quaternion originalRotation = body.transform.rotation;
             body.transform.rotation = Quaternion.AngleAxis(rotateInPlaceSpeed * Mathf.Sign(rotationInput) * Time.deltaTime, Vector3.up) * body.transform.rotation;
+            if (AnyLimbOverextended())
+            {
+                body.transform.rotation = originalRotation;
+            }
         }
         else
         {
             Vector3 newDirection = Vector3.RotateTowards(body.transform.forward, transform.forward, Mathf.Deg2Rad * rotateInPlaceSpeed * Time.deltaTime, 0.0f);
             body.transform.rotation = Quaternion.LookRotation(newDirection, Vector3.up);
         }
+        float lungeInput = Input.GetAxis("Lunge");
+        Debug.Log("lunge input" + lungeInput);
+        if (lungeInput != 0)
+        {
+            // if any leg is longer than max extension, should not turn.
+            // save original rotation
+            // apply new rotation
+            // check leg extension
+            // roll back if necessary
+            Vector3 originalPosition = body.transform.position;
+            body.transform.position += transform.rotation * new Vector3(0, 0, lungeInPlaceSpeed * Time.deltaTime * lungeInput);
+            if (AnyLimbOverextended())
+            {
+                body.transform.position = originalPosition;
+            }
+        }
+        else
+        {
+            body.transform.position = Vector3.MoveTowards(body.transform.position, transform.position, lungeInPlaceSpeed * Time.deltaTime);
+        }
+    }
+
+    bool AnyLimbOverextended()
+    {
+        foreach (Leg[] legPair in allLegs)
+        {
+            foreach (Leg leg in legPair)
+            {
+                if (leg.IsOverextended()) { return true; }
+            }
+        }
+        return false;
     }
 
     [ContextMenu("Reset legs")]

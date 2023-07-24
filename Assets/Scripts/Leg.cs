@@ -22,6 +22,7 @@ public class Leg : MonoBehaviour
     public float DEBUG_restingDistance;
     public float DEBUG_maxRange;
     public float DEBUG_currentDistance;
+    public float maxExtension;
     public float range;
     public float moveSpeed;
     void Start()
@@ -31,6 +32,7 @@ public class Leg : MonoBehaviour
         DEBUG_maxRange = Vector3.Distance(transform.position, footRangeCenter.position) + range;
         segmentLengths[0] = (Vector3.Distance(transform.position, footRangeCenter.position) / 2) + range * .4f;
         segmentLengths[1] = (Vector3.Distance(transform.position, footRangeCenter.position) / 2) + range * .4f;
+        maxExtension = segmentLengths[0] + segmentLengths[1];
     }
 
     // Update is called once per frame
@@ -87,6 +89,10 @@ public class Leg : MonoBehaviour
         }
     }
 
+    public bool IsOverextended()
+    {
+        return Vector3.Distance(legVisual.GetPosition(0), legVisual.GetPosition(2)) > maxExtension;
+    }
     void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(footRangeCenter.position, range);
