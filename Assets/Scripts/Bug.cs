@@ -5,10 +5,10 @@ using UnityEngine;
 [ExecuteAlways]
 public class Bug : MonoBehaviour
 {
+    public CharacterInput input;
     public float moveSpeed;
     public float moveRotationSpeed;
     public float rotateInPlaceSpeed;
-    public float lungeInPlaceSpeed;
     // public Leg leg1;
     // public Leg leg2;
     [Tooltip("left, right")]
@@ -17,7 +17,6 @@ public class Bug : MonoBehaviour
     public Leg[] midLegs = new Leg[2];
     [Tooltip("left, right")]
     public Leg[] hindLegs = new Leg[2];
-    public Leg[][] allLegs;
     public Body body;
     public float max = .3f;
     public float min = .2f;
@@ -35,10 +34,8 @@ public class Bug : MonoBehaviour
     void Update()
     {
         bool moving = false;
-        float movementInputX = Input.GetAxis("Horizontal");
-        float movementInputY = Input.GetAxis("Vertical");
-        allLegs = new Leg[][] { frontLegs, midLegs, hindLegs };
-        Vector3 movementInput = new Vector3(movementInputX, 0, movementInputY).normalized; // unity uses z axis for "up/down", whatever, I don't care
+        Vector3 movementInput = input.MovementInput;
+        float rotationInput = input.RotationInput;
         if (movementInput != Vector3.zero)
         { // nb. float bullshit will make this not work, maybe fiddle with it
             moving = true;
