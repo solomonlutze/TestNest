@@ -5,6 +5,7 @@ using UnityEngine;
 [ExecuteAlways]
 public class Bug : MonoBehaviour
 {
+    public CharacterInput input;
     public float moveSpeed;
     public float moveRotationSpeed;
     public float rotateInPlaceSpeed;
@@ -33,9 +34,8 @@ public class Bug : MonoBehaviour
     void Update()
     {
         bool moving = false;
-        float movementInputX = Input.GetAxis("Horizontal");
-        float movementInputY = Input.GetAxis("Vertical");
-        Vector3 movementInput = new Vector3(movementInputX, 0, movementInputY).normalized; // unity uses z axis for "up/down", whatever, I don't care
+        Vector3 movementInput = input.MovementInput;
+        float rotationInput = input.RotationInput;
         if (movementInput != Vector3.zero)
         { // nb. float bullshit will make this not work, maybe fiddle with it
             moving = true;
@@ -63,7 +63,6 @@ public class Bug : MonoBehaviour
                 }
             }
         }
-        float rotationInput = Input.GetAxis("Rotation");
         if (rotationInput != 0)
         {
             body.transform.rotation = Quaternion.AngleAxis(rotateInPlaceSpeed * Mathf.Sign(rotationInput) * Time.deltaTime, Vector3.up) * body.transform.rotation;
